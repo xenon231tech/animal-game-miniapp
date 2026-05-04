@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Animal Card Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0a0a0f;
+            color: white;
+            min-height: 100vh;
+            padding-bottom: 65px;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            padding: 20px 16px 16px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .logo p {
+            font-size: 10px;
+            opacity: 0.8;
+            margin-top: 2px;
+            letter-spacing: 1px;
+        }
+
+        .points-boxes {
+            display: flex;
+            gap: 12px;
+        }
+
+        .point-item {
+            background: rgba(0,0,0,0.35);
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .point-label {
+            font-size: 9px;
+            opacity: 0.7;
+        }
+
+        .point-value {
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        /* ========== SPIN SECTION ========== */
+        .spin-section {
+            background: #1a1a2e;
+            margin: -20px 16px 20px;
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .spin-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            width: 90px;
+            height: 90px;
+            border-radius: 45px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .spin-cards {
+            flex: 1;
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+        }
+
+        .min-card {
+            text-align: center;
+            min-width: 55px;
+        }
+
+        .min-card .emoji {
+            font-size: 36px;
+        }
+
+        .min-card .name {
+            font-size: 10px;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* ========== LATEST CARDS SECTION ========== */
+        .section {
+            margin: 20px 16px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .rarity-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .rarity-badge {
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .game-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .game-card .emoji {
+            font-size: 40px;
+        }
+
+        .game-card .name {
+            font-size: 12px;
+            font-weight: 500;
+            margin: 6px 0 2px;
+        }
+
+        .game-card .rarity-text {
+            font-size: 9px;
+        }
+
+        .legendary { color: #fbbf24; }
+        .epic { color: #a855f7; }
+        .rare { color: #3b82f6; }
+        .common { color: #9ca3af; }
+
+        /* ========== BOTTOM NAV ========== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0f0f17;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 16px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 30px;
+            opacity: 0.5;
+            transition: 0.2s;
+        }
+
+        .nav-item.active {
+            opacity: 1;
+            background: rgba(220,38,38,0.2);
+        }
+
+        .nav-emoji { font-size: 20px; }
+        .nav-label { font-size: 9px; font-weight: 500; }
+
+        /* ========== PAGES ========== */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* ========== COLLECTION PAGE ========== */
+        .search-bar {
+            background: #1a1a2e;
+            margin: 12px 16px;
+            padding: 10px 16px;
+            border-radius: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: white;
+            flex: 1;
+            outline: none;
+            font-size: 13px;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            margin: 0 16px 16px;
+            overflow-x: auto;
+        }
+        .filter-btn {
+            background: #1a1a2e;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: white;
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .rarity-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 16px 16px 8px;
+        }
+        .rarity-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 5px;
+        }
+        .collection-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 12px 8px;
+            text-align: center;
+            position: relative;
+        }
+        .collection-card.locked {
+            opacity: 0.5;
+        }
+        .collection-card .emoji { font-size: 40px; }
+        .collection-card .name { font-size: 12px; font-weight: 500; margin: 6px 0 2px; }
+        .collection-card .owned { font-size: 10px; margin-top: 4px; }
+        .collection-card .points { font-size: 9px; margin-top: 2px; opacity: 0.7; }
+
+        /* ========== SHOP PAGE ========== */
+        .wallet-address {
+            background: #1a1a2e;
+            margin: 12px 16px;
+            padding: 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-family: monospace;
+            text-align: center;
+            word-break: break-all;
+        }
+        .shop-item {
+            background: #1a1a2e;
+            margin: 8px 16px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .shop-info { display: flex; align-items: center; gap: 12px; }
+        .shop-emoji { font-size: 32px; }
+        .shop-name { font-weight: 600; font-size: 13px; }
+        .shop-price { font-size: 10px; color: #fbbf24; margin-top: 2px; }
+        .buy-btn {
+            background: #10b981;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        /* ========== STATS PAGE ========== */
+        .stat-card {
+            background: #1a1a2e;
+            margin: 12px 16px;
+            padding: 16px;
+            border-radius: 20px;
+        }
+        .stat-value { font-size: 28px; font-weight: bold; margin: 8px 0; }
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 6px;
+            margin: 12px 0;
+        }
+        .progress-fill {
+            background: #fbbf24;
+            border-radius: 10px;
+            height: 100%;
+            width: 0%;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+
+        /* ========== LEADERBOARD ========== */
+        .time-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 12px 16px;
+        }
+        .time-tab {
+            flex: 1;
+            background: #1a1a2e;
+            border: none;
+            padding: 8px;
+            border-radius: 30px;
+            color: white;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+        }
+        .time-tab.active { background: #dc2626; }
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 45px 1fr 80px 60px 60px;
+            padding: 10px 16px;
+            font-size: 10px;
+            color: #9ca3af;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .leaderboard-row {
+            display: grid;
+            grid-template-columns: 45px 1fr 80px 60px 60px;
+            padding: 12px 16px;
+            font-size: 12px;
+            align-items: center;
+        }
+        .leaderboard-row.you {
+            background: rgba(220,38,38,0.15);
+            border-radius: 12px;
+            margin: 0 12px;
+        }
+        .share-btn {
+            display: block;
+            background: #3b82f6;
+            width: calc(100% - 32px);
+            margin: 16px;
+            padding: 10px;
+            border-radius: 30px;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* ========== ME PAGE ========== */
+        .profile-card {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            margin: 16px;
+            padding: 24px;
+            border-radius: 24px;
+            text-align: center;
+        }
+        .profile-name { font-size: 22px; font-weight: bold; margin: 8px 0; }
+        .vip-badge {
+            background: #fbbf24;
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .me-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px;
+        }
+        .me-stat-mini {
+            background: #1a1a2e;
+            padding: 12px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        .referral-box {
+            background: #1a1a2e;
+            margin: 16px;
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        .referral-code {
+            background: #0a0a0f;
+            padding: 10px;
+            border-radius: 30px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        .achievement-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        .menu-item {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* ========== POPUP ========== */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a2e;
+            border-radius: 24px;
+            padding: 24px;
+            text-align: center;
+            z-index: 100;
+            border: 1px solid #fbbf24;
+            display: none;
+            min-width: 240px;
+        }
+        .popup.show { display: block; animation: pop 0.25s ease; }
+        @keyframes pop {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 12px;
+            display: none;
+            white-space: nowrap;
+            z-index: 100;
+        }
+        .toast.show { display: block; animation: fadeUp 0.25s ease; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER PERSIS GAMBAR -->
+<div class="header">
+    <div class="header-top">
+        <div class="logo">
+            <h1>🐉 ANIMALCARD</h1>
+            <p>COLLECTION</p>
+        </div>
+        <div class="points-boxes">
+            <div class="point-item">
+                <div class="point-label">POINTS</div>
+                <div class="point-value">1240</div>
+            </div>
+            <div class="point-item">
+                <div class="point-label">SPINS</div>
+                <div class="point-value">8</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SPIN SECTION -->
+<div class="spin-section">
+    <button class="spin-btn" id="spinBtn">
+        <span>🎰</span>
+        <span>SPIN</span>
+    </button>
+    <div class="spin-cards">
+        <div class="min-card"><div class="emoji">🐉</div><div class="name">Dragon</div></div>
+        <div class="min-card"><div class="emoji">🐺</div><div class="name">Wolf</div></div>
+        <div class="min-card"><div class="emoji">🐭</div><div class="name">Mouse</div></div>
+        <div class="min-card"><div class="emoji">🐱</div><div class="name">Ear Cat</div></div>
+    </div>
+</div>
+
+<!-- GAME PAGE -->
+<div id="gamePage" class="page active">
+    <div class="section">
+        <div class="section-title">✨ LATEST CARDS</div>
+        <div class="rarity-row">
+            <span class="rarity-badge legendary">LEGENDARY</span>
+            <span class="rarity-badge epic">EPIC</span>
+            <span class="rarity-badge rare">RARE</span>
+            <span class="rarity-badge common">COMMON</span>
+        </div>
+        <div class="cards-grid">
+            <div class="game-card"><div class="emoji">🐉</div><div class="name">Dragon</div><div class="rarity-text legendary">Legendary</div></div>
+            <div class="game-card"><div class="emoji">🦅</div><div class="name">Eagle</div><div class="rarity-text legendary">Legendary</div></div>
+            <div class="game-card"><div class="emoji">🐱</div><div class="name">Cat</div><div class="rarity-text rare">Rare</div></div>
+            <div class="game-card"><div class="emoji">🐜</div><div class="name">Ant</div><div class="rarity-text common">Common</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- COLLECTION PAGE -->
+<div id="collectionPage" class="page">
+    <div class="search-bar">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Search animals...">
+    </div>
+    <div class="filter-buttons">
+        <button class="filter-btn" data-filter="all">SORT BY</button>
+        <button class="filter-btn" data-filter="all">FILTER BY RARITY</button>
+    </div>
+    <div id="collectionContainer"></div>
+</div>
+
+<!-- SHOP PAGE -->
+<div id="shopPage" class="page">
+    <div class="wallet-address" id="walletAddress">0xA79b23182e191fDFb5049FFFb5BEE54830980c81</div>
+    <div id="shopContainer"></div>
+</div>
+
+<!-- STATS PAGE -->
+<div id="statsPage" class="page">
+    <div class="stat-card">
+        <div>TOTAL POINTS</div>
+        <div class="stat-value">1240</div>
+    </div>
+    <div class="stat-card">
+        <div>COLLECTION COMPLETION</div>
+        <div class="stat-value">57%</div>
+        <div>(4/7 Animals)</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:57%"></div></div>
+        <div class="stat-row"><span>Total Cards: 520</span><span>Unique Cards: 42</span></div>
+    </div>
+    <div class="stat-card">
+        <div>RARITY BREAKDOWN</div>
+        <div class="stat-row"><span>COMMON</span><span>250</span></div>
+        <div class="stat-row"><span>RARE</span><span>150</span></div>
+        <div class="stat-row"><span>EPIC</span><span>80</span></div>
+        <div class="stat-row"><span>LEGENDARY</span><span>42</span></div>
+    </div>
+    <div class="stat-card">
+        <div>ACTIVE SUBSCRIPTION: <span style="color:#fbbf24">GOLD PASS</span></div>
+        <div>CURRENT MULTIPLIER: <span style="color:#fbbf24">x2 POINTS</span></div>
+    </div>
+</div>
+
+<!-- LEADERBOARD PAGE -->
+<div id="leaderboardPage" class="page">
+    <div class="time-tabs">
+        <button class="time-tab active">ALL TIME</button>
+        <button class="time-tab">MONTHLY</button>
+        <button class="time-tab">WEEKLY</button>
+    </div>
+    <div class="leaderboard-header">
+        <div>Rank</div>
+        <div>Player</div>
+        <div>FID</div>
+        <div>Points</div>
+        <div>Cards</div>
+    </div>
+    <div id="leaderboardList"></div>
+    <div class="share-btn">📤 Share</div>
+</div>
+
+<!-- ME PAGE -->
+<div id="mePage" class="page">
+    <div class="profile-card">
+        <div style="font-size:48px">👤</div>
+        <div class="profile-name">xenon_d62</div>
+        <div>FID: 123456</div>
+        <div class="vip-badge" style="margin-top:8px">VIP</div>
+    </div>
+    <div class="me-stats-grid">
+        <div class="me-stat-mini"><div>Total Points</div><div style="font-size:20px; font-weight:bold">1240</div></div>
+        <div class="me-stat-mini"><div>Total Spins</div><div style="font-size:20px; font-weight:bold">85</div></div>
+        <div class="me-stat-mini"><div>Current Streak</div><div style="font-size:20px; font-weight:bold">7 Days</div></div>
+        <div class="me-stat-mini"><div>Active Multiplier</div><div style="font-size:20px; font-weight:bold">2x</div></div>
+    </div>
+    <div class="referral-box">
+        <div>Referral</div>
+        <div class="referral-code">XENON-D62</div>
+        <div style="display:flex; gap:10px; justify-content:center">
+            <button class="buy-btn" onclick="copyReferral()">Share</button>
+            <button class="buy-btn" style="background:#3b82f6">Invite Friends</button>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div>Achievements</div>
+        <div class="achievement-item"><span>First Spin</span><span>75%</span></div>
+        <div class="achievement-item"><span>Dragon Collector</span><span>Eagle Unlocked</span></div>
+        <div class="achievement-item"><span>Eagle Eye</span><span>5/5Dragons | 15/20Birds</span></div>
+    </div>
+    <div class="stat-card">
+        <div class="menu-item">📜 Transaction <span>→</span></div>
+        <div class="menu-item">🎁 Daily Reward <span>→</span></div>
+        <div class="menu-item">👥 Referral History <span>→</span></div>
+        <div class="menu-item">📡 Airdrop <span>→</span></div>
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <div class="nav-item active" data-page="game"><div class="nav-emoji">🎮</div><div class="nav-label">GAME</div></div>
+    <div class="nav-item" data-page="collection"><div class="nav-emoji">📦</div><div class="nav-label">COLLECTION</div></div>
+    <div class="nav-item" data-page="shop"><div class="nav-emoji">🛒</div><div class="nav-label">SHOP</div></div>
+    <div class="nav-item" data-page="stats"><div class="nav-emoji">📊</div><div class="nav-label">STATS</div></div>
+    <div class="na
