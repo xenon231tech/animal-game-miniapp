@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Animal Card Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0a0a0f;
+            color: white;
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+
+        /* ========== HEADER MERAH ========== */
+        .header {
+            background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+            padding: 20px 16px 16px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .logo .collection-text {
+            font-size: 10px;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .points-boxes {
+            display: flex;
+            gap: 12px;
+        }
+
+        .point-item {
+            background: rgba(0,0,0,0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .point-label {
+            font-size: 9px;
+            opacity: 0.7;
+        }
+
+        .point-value {
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+
+        /* ========== SPIN SECTION ========== */
+        .spin-section {
+            background: #1a1a2e;
+            margin: -20px 16px 20px;
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .spin-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .spin-btn:active {
+            transform: scale(0.96);
+        }
+
+        .spin-cards {
+            flex: 1;
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+        }
+
+        .min-card {
+            text-align: center;
+            min-width: 55px;
+        }
+
+        .min-card .emoji {
+            font-size: 34px;
+        }
+
+        .min-card .name {
+            font-size: 9px;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        /* ========== LATEST CARDS ========== */
+        .section {
+            margin: 20px 16px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .rarity-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .rarity-label {
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .legendary-color { color: #fbbf24; }
+        .epic-color { color: #a855f7; }
+        .rare-color { color: #3b82f6; }
+        .common-color { color: #9ca3af; }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .game-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .game-card .emoji {
+            font-size: 42px;
+        }
+
+        .game-card .name {
+            font-size: 12px;
+            font-weight: 600;
+            margin: 6px 0 2px;
+        }
+
+        .game-card .rarity-text {
+            font-size: 9px;
+        }
+
+        /* ========== BOTTOM NAV ========== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0f0f17;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 16px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 30px;
+            opacity: 0.5;
+            transition: 0.2s;
+        }
+
+        .nav-item.active {
+            opacity: 1;
+            background: rgba(229,57,53,0.2);
+        }
+
+        .nav-emoji { font-size: 20px; }
+        .nav-label { font-size: 9px; font-weight: 600; }
+
+        /* ========== PAGES ========== */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* ========== COLLECTION PAGE ========== */
+        .search-bar {
+            background: #1a1a2e;
+            margin: 12px 16px;
+            padding: 10px 16px;
+            border-radius: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: white;
+            flex: 1;
+            outline: none;
+            font-size: 13px;
+        }
+        .search-bar input::placeholder {
+            color: #6b7280;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 0 16px 16px;
+        }
+        .filter-btn {
+            background: #1a1a2e;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .rarity-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 16px 16px 8px;
+        }
+        .rarity-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin: 0 16px 16px;
+        }
+        .collection-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 12px 6px;
+            text-align: center;
+        }
+        .collection-card.locked {
+            opacity: 0.5;
+        }
+        .collection-card .emoji { font-size: 36px; }
+        .collection-card .name { font-size: 11px; font-weight: 600; margin: 6px 0 2px; }
+        .collection-card .owned { font-size: 10px; }
+        .collection-card .points { font-size: 9px; opacity: 0.7; margin-top: 2px; }
+        .collection-card .locked-text { font-size: 8px; margin-top: 4px; color: #ef4444; }
+
+        /* ========== SHOP PAGE ========== */
+        .wallet-address {
+            background: #1a1a2e;
+            margin: 12px 16px;
+            padding: 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-family: monospace;
+            text-align: center;
+            word-break: break-all;
+        }
+        .shop-item {
+            background: #1a1a2e;
+            margin: 8px 16px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .shop-info { display: flex; align-items: center; gap: 12px; }
+        .shop-emoji { font-size: 32px; }
+        .shop-name { font-weight: 600; font-size: 13px; }
+        .shop-price { font-size: 10px; color: #fbbf24; margin-top: 2px; }
+        .buy-btn {
+            background: #10b981;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .starter-badge {
+            background: #3b82f6;
+            font-size: 8px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+
+        /* ========== STATS PAGE ========== */
+        .stat-card {
+            background: #1a1a2e;
+            margin: 12px 16px;
+            padding: 16px;
+            border-radius: 20px;
+        }
+        .big-stat-value { font-size: 32px; font-weight: bold; margin: 8px 0; }
+        .small-stat-value { font-size: 20px; font-weight: bold; }
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 6px;
+            margin: 12px 0;
+        }
+        .progress-fill {
+            background: #fbbf24;
+            border-radius: 10px;
+            height: 100%;
+            width: 57%;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        .subscription-text {
+            color: #fbbf24;
+        }
+
+        /* ========== LEADERBOARD ========== */
+        .time-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 12px 16px;
+        }
+        .time-tab {
+            flex: 1;
+            background: #1a1a2e;
+            border: none;
+            padding: 8px;
+            border-radius: 30px;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+        }
+        .time-tab.active { background: #e53935; }
+        .leaderboard-header {
+            display: grid;
+            grid-template-columns: 40px 1fr 50px 60px 50px;
+            padding: 10px 16px;
+            font-size: 10px;
+            color: #9ca3af;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .leaderboard-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 50px 60px 50px;
+            padding: 12px 16px;
+            font-size: 12px;
+            align-items: center;
+        }
+        .leaderboard-row.you {
+            background: rgba(229,57,53,0.15);
+            border-radius: 12px;
+            margin: 0 12px;
+        }
+        .share-button {
+            display: block;
+            background: #3b82f6;
+            width: calc(100% - 32px);
+            margin: 16px;
+            padding: 10px;
+            border-radius: 30px;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* ========== ME PAGE ========== */
+        .profile-card {
+            background: linear-gradient(135deg, #e53935, #b71c1c);
+            margin: 16px;
+            padding: 20px;
+            border-radius: 24px;
+            text-align: center;
+        }
+        .profile-avatar { font-size: 48px; }
+        .profile-name { font-size: 20px; font-weight: bold; margin: 8px 0; }
+        .profile-fid { font-size: 12px; opacity: 0.8; }
+        .vip-badge {
+            background: #fbbf24;
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        .me-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px;
+        }
+        .me-stat {
+            background: #1a1a2e;
+            padding: 12px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        .me-stat-label { font-size: 11px; opacity: 0.7; }
+        .me-stat-value { font-size: 20px; font-weight: bold; margin-top: 4px; }
+        .referral-section {
+            background: #1a1a2e;
+            margin: 16px;
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+        }
+        .referral-code {
+            background: #0a0a0f;
+            padding: 10px;
+            border-radius: 30px;
+            font-family: monospace;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .referral-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .achievements-card {
+            background: #1a1a2e;
+            margin: 16px;
+            padding: 16px;
+            border-radius: 16px;
+        }
+        .achievement-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        .menu-list {
+            background: #1a1a2e;
+            margin: 16px;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .menu-item {
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .menu-item:last-child { border-bottom: none; }
+
+        /* ========== POPUP ========== */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a2e;
+            border-radius: 24px;
+            padding: 20px;
+            text-align: center;
+            z-index: 100;
+            border: 1px solid #fbbf24;
+            display: none;
+            min-width: 220px;
+        }
+        .popup.show { display: block; animation: pop 0.25s ease; }
+        @keyframes pop {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 12px;
+            display: none;
+            white-space: nowrap;
+            z-index: 100;
+        }
+        .toast.show { display: block; animation: fadeUp 0.25s ease; }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-top">
+        <div class="logo">
+            <h1>🐉 ANIMALCARD</h1>
+            <div class="collection-text">COLLECTION</div>
+        </div>
+        <div class="points-boxes">
+            <div class="point-item">
+                <div class="point-label">POINTS</div>
+                <div class="point-value">1240</div>
+            </div>
+            <div class="point-item">
+                <div class="point-label">SPINS</div>
+                <div class="point-value">8</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SPIN SECTION -->
+<div class="spin-section">
+    <button class="spin-btn" id="spinBtn">
+        <span>🎰</span>
+        <span>SPIN</span>
+    </button>
+    <div class="spin-cards" id="spinCards">
+        <div class="min-card"><div class="emoji">🐉</div><div class="name">Dragon</div></div>
+        <div class="min-card"><div class="emoji">🐺</div><div class="name">Wolf</div></div>
+        <div class="min-card"><div class="emoji">🐭</div><div class="name">Mouse</div></div>
+        <div class="min-card"><div class="emoji">🐱</div><div class="name">Ear Cat</div></div>
+    </div>
+</div>
+
+<!-- GAME PAGE -->
+<div id="gamePage" class="page active">
+    <div class="section">
+        <div class="section-title">✨ LATEST CARDS</div>
+        <div class="rarity-row">
+            <span class="rarity-label legendary-color">LEGENDARY</span>
+            <span class="rarity-label epic-color">EPIC</span>
+            <span class="rarity-label rare-color">RARE</span>
+            <span class="rarity-label common-color">COMMON</span>
+        </div>
+        <div class="cards-grid">
+            <div class="game-card"><div class="emoji">🐉</div><div class="name">Dragon</div><div class="rarity-text legendary-color">Legendary</div></div>
+            <div class="game-card"><div class="emoji">🦅</div><div class="name">Eagle</div><div class="rarity-text legendary-color">Legendary</div></div>
+            <div class="game-card"><div class="emoji">🐱</div><div class="name">Cat</div><div class="rarity-text rare-color">Rare</div></div>
+            <div class="game-card"><div class="emoji">🐜</div><div class="name">Ant</div><div class="rarity-text common-color">Common</div></div>
+        </div>
+    </div>
+</div>
+
+<!-- COLLECTION PAGE -->
+<div id="collectionPage" class="page">
+    <div class="search-bar">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Search animals...">
+    </div>
+    <div class="filter-buttons">
+        <button class="filter-btn" id="sortBtn">SORT BY</button>
+        <button class="filter-btn" id="filterBtn">FILTER BY RARITY</button>
+    </div>
+    <div id="collectionContainer"></div>
+</div>
+
+<!-- SHOP PAGE -->
+<div id="shopPage" class="page">
+    <div class="wallet-address" id="walletDisplay">0xA79b23182e191fDFb5049FFFb5BEE54830980c81</div>
+    <div id="shopContainer"></div>
+</div>
+
+<!-- STATS PAGE -->
+<div id="statsPage" class="page">
+    <div class="stat-card">
+        <div>TOTAL POINTS</div>
+        <div class="big-stat-value">1240</div>
+    </div>
+    <div class="stat-card">
+        <div>COLLECTION COMPLETION</div>
+        <div class="small-stat-value">57%</div>
+        <div style="font-size:12px; margin-top:4px">(4/7 Animals)</div>
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <div class="stat-row"><span>Total Cards: 520</span><span>Unique Cards: 42</span></div>
+    </div>
+    <div class="stat-card">
+        <div>RARITY BREAKDOWN</div>
+        <div class="stat-row"><span>COMMON</span><span>250</span></div>
+        <div class="stat-row"><span>RARE</span><span>150</span></div>
+        <div class="stat-row"><span>EPIC</span><span>80</span></div>
+        <div class="stat-row"><span>LEGENDARY</span><span>42</span></div>
+    </div>
+    <div class="stat-card">
+        <div>ACTIVE SUBSCRIPTION: <span class="subscription-text">GOLD PASS</span></div>
+        <div style="margin-top:8px">CURRENT MULTIPLIER: <span class="subscription-text">x2 POINTS</span></div>
+    </div>
+</div>
+
+<!-- LEADERBOARD PAGE -->
+<div id="leaderboardPage" class="page">
+    <div class="time-tabs">
+        <button class="time-tab active" data-time="all">ALL TIME</button>
+        <button class="time-tab" data-time="monthly">MONTHLY</button>
+        <button class="time-tab" data-time="weekly">WEEKLY</button>
+    </div>
+    <div class="leaderboard-header">
+        <div>Rank</div>
+        <div>Player</div>
+        <div>FID</div>
+        <div>Points</div>
+        <div>Cards</div>
+    </div>
+    <div id="leaderboardList"></div>
+    <div class="share-button" id="shareLeaderboard">📤 Share</div>
+</div>
+
+<!-- ME PAGE -->
+<div id="mePage" class="page">
+    <div class="profile-card">
+        <div class="profile-avatar">👤</div>
+        <div class="profile-name">xenon_d62</div>
+        <div class="profile-fid">FID: 123456</div>
+        <div class="vip-badge">VIP</div>
+    </div>
+    <div class="me-stats-grid">
+        <div class="me-stat"><div class="me-stat-label">Total Points</div><div class="me-stat-value">1240</div></div>
+        <div class="me-stat"><div class="me-stat-label">Total Spins</div><div class="me-stat-value">85</div></div>
+        <div class="me-stat"><div class="me-stat-label">Current Streak</div><div class="me-stat-value">7 Days</div></div>
+       
