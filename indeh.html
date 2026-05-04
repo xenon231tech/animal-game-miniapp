@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Animal Card Game - Mini App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f1a;
+            color: white;
+            min-height: 100vh;
+            padding-bottom: 75px;
+        }
+
+        /* Header premium */
+        .header {
+            background: linear-gradient(135deg, #e94560 0%, #8b1e3a 100%);
+            padding: 24px 20px;
+            border-radius: 0 0 28px 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .logo h1 {
+            font-size: 22px;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo p {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .points-box {
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(8px);
+            padding: 6px 14px;
+            border-radius: 40px;
+            text-align: center;
+        }
+
+        .points-value {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .points-label {
+            font-size: 10px;
+            opacity: 0.7;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 12px;
+        }
+
+        .stat-badge {
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+            padding: 8px 16px;
+            border-radius: 40px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-badge span:first-child {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .stat-badge span:last-child {
+            font-size: 11px;
+            margin-left: 6px;
+            opacity: 0.7;
+        }
+
+        /* Spin Button */
+        .spin-container {
+            display: flex;
+            justify-content: center;
+            margin: 35px 0;
+        }
+
+        .spin-btn {
+            width: 150px;
+            height: 150px;
+            border-radius: 75px;
+            background: linear-gradient(145deg, #f9ca24, #f0932b);
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 15px 35px rgba(249,202,36,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .spin-btn:active {
+            transform: scale(0.96);
+        }
+
+        .spin-emoji {
+            font-size: 42px;
+        }
+
+        /* Latest Cards Section */
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 20px 18px 12px 18px;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 18px;
+            background: #f9ca24;
+            border-radius: 2px;
+        }
+
+        .cards-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 0 18px;
+            scrollbar-width: thin;
+        }
+
+        .cards-scroll::-webkit-scrollbar {
+            height: 3px;
+        }
+
+        .card-horizontal {
+            background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 12px 16px;
+            min-width: 85px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card-emoji-lg {
+            font-size: 48px;
+            margin-bottom: 6px;
+        }
+
+        .card-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .card-rarity {
+            font-size: 9px;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .legendary { color: #f9ca24; }
+        .epic { color: #c084fc; }
+        .rare { color: #60a5fa; }
+        .common { color: #94a3b8; }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15,15,26,0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 18px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 30px;
+            transition: 0.2s;
+            opacity: 0.6;
+        }
+
+        .nav-item.active {
+            opacity: 1;
+            background: rgba(233,69,96,0.2);
+        }
+
+        .nav-emoji {
+            font-size: 22px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Shop Items */
+        .shop-item {
+            background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+            margin: 12px 18px;
+            padding: 16px;
+            border-radius: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .shop-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .shop-emoji {
+            font-size: 42px;
+        }
+
+        .shop-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .shop-desc {
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 3px;
+        }
+
+        .buy-btn {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .buy-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Collection Grid */
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 14px;
+            padding: 0 18px;
+            margin-top: 5px;
+        }
+
+        .collection-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+            border-radius: 20px;
+            padding: 14px 8px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* Stats Card */
+        .stats-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+            margin: 16px 18px;
+            padding: 20px;
+            border-radius: 28px;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            height: 10px;
+            margin: 12px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #f9ca24, #f0932b);
+            border-radius: 12px;
+            height: 100%;
+            width: 0%;
+        }
+
+        .rarity-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+        }
+
+        /* Popup */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e1e2e;
+            border-radius: 32px;
+            padding: 28px 24px;
+            text-align: center;
+            z-index: 200;
+            border: 1px solid #f9ca24;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            display: none;
+            min-width: 240px;
+        }
+
+        .popup.show {
+            display: block;
+            animation: popIn 0.25s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .wallet-info {
+            background: rgba(0,0,0,0.5);
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 9px;
+            text-align: center;
+            margin: 10px 18px;
+            word-break: break-all;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-top">
+        <div class="logo">
+            <h1>🐉 ANIMALCARD</h1>
+            <p>by xenon_d62</p>
+        </div>
+        <div class="points-box">
+            <div class="points-value">⭐ <span id="points">1240</span></div>
+            <div class="points-label">Total Points</div>
+        </div>
+    </div>
+    <div class="header-stats">
+        <div class="stat-badge">
+            <span id="spinsLeft">8</span> <span>Spins</span>
+        </div>
+        <div class="stat-badge">
+            <span>x<span id="multiplier">2</span></span> <span>Multiplier</span>
+        </div>
+    </div>
+</div>
+
+<div class="wallet-info">
+    💰 Payment → 0x0E29...22b039D
+</div>
+
+<!-- GAME PAGE -->
+<div id="gamePage" class="page active">
+    <div class="spin-container">
+        <button class="spin-btn" id="spinBtn">
+            <div class="spin-emoji">🎰</div>
+            <div>SPIN</div>
+            <div style="font-size:13px" id="spinBtnCount">8 left</div>
+        </button>
+    </div>
+
+    <div class="section-title">✨ Latest Cards</div>
+    <div class="cards-scroll" id="latestCards">
+        <div class="card-horizontal"><div class="card-emoji-lg">🐉</div><div class="card-name">Dragon</div><div class="card-rarity legendary">Legendary</div></div>
+        <div class="card-horizontal"><div class="card-emoji-lg">🦅</div><div class="card-name">Eagle</div><div class="card-rarity legendary">Legendary</div></div>
+        <div class="card-horizontal"><div class="card-emoji-lg">🐱</div><div class="card-name">Cat</div><div class="card-rarity rare">Rare</div></div>
+        <div class="card-horizontal"><div class="card-emoji-lg">🐜</div><div class="card-name">Ant</div><div class="card-rarity common">Common</div></div>
+    </div>
+
+    <div class="section-title">📦 Your Collection</div>
+    <div class="cards-scroll" id="yourCollection"></div>
+</div>
+
+<!-- SHOP PAGE -->
+<div id="shopPage" class="page">
+    <div class="section-title">🛒 Shop</div>
+    <div id="shopItems"></div>
+</div>
+
+<!-- COLLECTION PAGE -->
+<div id="collectionPage" class="page">
+    <div class="section-title">📦 All Cards</div>
+    <div class="collection-grid" id="collectionGrid"></div>
+</div>
+
+<!-- STATS PAGE -->
+<div id="statsPage" class="page">
+    <div class="stats-card" id="statsCompletion"></div>
+    <div class="stats-card" id="statsDetail"></div>
+</div>
+
+<!-- ME PAGE -->
+<div id="mePage" class="page">
+    <div class="stats-card" id="meProfile"></div>
+    <div class="stats-card" id="meReferral"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <div class="nav-item active" data-page="game">
+        <div class="nav-emoji">🎮</div>
+        <div class="nav-label">GAME</div>
+    </div>
+    <div class="nav-item" data-page="shop">
+        <div class="nav-emoji">🛒</div>
+        <div class="nav-label">SHOP</div>
+    </div>
+    <div class="nav-item" data-page="collection">
+        <div class="nav-emoji">📦</div>
+        <div class="nav-label">COLLECTION</div>
+    </div>
+    <div class="nav-item" data-page="stats">
+        <div class="nav-emoji">📊</div>
+        <div class="nav-label">STATS</div>
+    </div>
+    <div class="nav-item" data-page="me">
+        <div class="nav-emoji">👤</div>
+        <div class="nav-label">ME</div>
+    </div>
+</div>
+
+<div id="popup" class="popup">
+    <div id="popupMsg"></div>
+</div>
+
+<script>
+    const YOUR_WALLET = '0x0E2946D068Bc33a19eBa63ad816A5168d22b039D';
+    
+    const cards = [
+        { id: 'dragon', name: 'Dragon', emoji: '🐉', rarity: 'legendary', points: 5000, max: 1 },
+        { id: 'eagle', name: 'Eagle', emoji: '🦅', rarity: 'legendary', points: 2500, max: 1 },
+        { id: 'wolf', name: 'Wolf', emoji: '🐺', rarity: 'epic', points: 2200, max: 1 },
+        { id: 'dog', name: 'Dog', emoji: '🐶', rarity: 'rare', points: 1200, max: 1 },
+        { id: 'cat', name: 'Cat', emoji: '🐱', rarity: 'rare', points: 1000, max: 1 },
+        { id: 'mouse', name: 'Mouse', emoji: '🐭', rarity: 'common', points: 150, max: 1 },
+        { id: 'ant', name: 'Ant', emoji: '🐜', rarity: 'common', points: 100, max: 5 }
+    ];
+    
+    let gameState = {
+        points: 1240,
+        spins: 8,
+        multiplier: 2,
+        cards: cards.map(c => ({ ...c, owned: c.id === 'ant' ? 5 : 0 }))
+    };
+    
+    function saveGame() { localStorage.setItem('animal_game', JSON.stringify(gameState)); }
+    
+    function loadGame() {
+        const saved = localStorage.getItem('animal_game');
+        if (saved) gameState = JSON.parse(saved);
+        updateUI();
+    }
+    
+    function showPopup(msg) {
+        const popup = document.getElementById('popup');
+        document.getElementById('popupMsg').innerHTML = msg;
+        popup.classList.add('show');
+        setTimeout(() => popup.classList.remove('show'), 2500);
+    }
+    
+    function spin() {
+        if (gameState.spins <= 0) { showPopup('⛔ No spins left! Buy in SHOP'); return; }
+        gameState.spins--;
+        
+        const available = gameState.cards.filter(c => c.owned < c.max);
+        if (available.length === 0) { showPopup('🎉 You completed all cards!'); return; }
+        
+        const r = Math.random();
+        let candidates;
+        if (r < 0.05) candidates = gameState.cards.filter(c => c.rarity === 'legendary' && c.owned < c.max);
+        else if (r < 0.15) candidates = gameState.cards.filter(c => c.rarity === 'epic' && c.owned < c.max);
+        else if (r < 0.35) candidates = gameState.cards.filter(c => c.rarity === 'rare' && c.owned < c.max);
+        else candidates = gameState.cards.filter(c => c.rarity === 'common' && c.owned < c.max);
+        
+        if (candidates.length === 0) candidates = available;
+        const earned = candidates[Math.floor(Math.random() * candidates.length)];
+        earned.owned++;
+        
+        const pointsEarned = earned.points * gameState.multiplier;
+        gameState.points += pointsEarned;
+        
+        saveGame();
+        updateUI();
+        showPopup(`🎉 ${earned.emoji} ${earned.name}! +${pointsEarned} pts`);
+    }
+    
+    function buyItem(item) {
+        if (confirm(`Buy ${item.name} for ${item.price} USDC?\n\nPayment to:\n${YOUR_WALLET}`)) {
+            if (item.spins) gameState.spins += item.spins;
+            if (item.cardId) {
+                const card = gameState.cards.find(c => c.id === item.cardId);
+                if (card && card.owned < card.max) card.owned++;
+            }
+            saveGame();
+            updateUI();
+            showPopup(`✅ ${item.name} purchased!`);
+        }
+    }
+    
+    function updateUI() {
+        document.getElementById('points').innerText = gameState.points;
+        document.getElementById('spinsLeft').innerText = gameState.spins;
+        document.getElementById('multiplier').innerText = gameState.multiplier;
+        document.getElementById('spinBtnCount').innerText = gameState.spins + ' left';
+        
+        // Your Collection (Home)
+        const ownedCards = gameState.cards.filter(c => c.owned > 0);
+        const yourCollDiv = document.getElementById('yourCollection');
+        yourCollDiv.innerHTML = ownedCards.length ? ownedCards.map(c => `
+            <div class="card-horizontal">
+                <div class="card-emoji-lg">${c.emoji}</div>
+                <div class="card-name">${c.name}</div>
+                <div class="card-rarity ${c.rarity}">${c.owned}/${c.max}</div>
+            </div>
+        `).join('') : '<div class="card-horizontal">✨ Spin to get cards</div>';
+        
+        // Shop Items
+        const shopList = [
+            { name: '🎲 10 Spins', price: 1, spins: 10, emoji: '🎲' },
+            { name: '🎲🎲 55 Spins', price: 5, spins: 55, emoji: '🎲🎲' },
+            { name: '🎲🎲🎲 120 Spins', price: 10, spins: 120, emoji: '🎲🎲🎲' },
+            { name: '🎁 Gacha Box', price: 2, spins: 5, emoji: '🎁' },
+            { name: '🐉 Dragon Card', price: 50, cardId: 'dragon', emoji: '🐉' }
+        ];
+        document.getElementById('shopItems').innerHTML = shopList.map(item => `
+            <div class="shop-item">
+                <div class="shop-info">
+                    <div class="shop-emoji">${item.emoji}</div>
+                    <div><div class="shop-name">${item.name}</div><div class="shop-desc">${item.spins ? item.spins + ' spins' : 'Instant unlock'}</div></div>
+                </div>
+                <button class="buy-btn" onclick='buyItem(${JSON.stringify(item).replace(/'/g, "&#39;")})'>Buy ${item.price} USDC</button>
+            </div>
+        `).join('');
+        
+        // Collection Page
+        document.getElementById('collectionGrid').innerHTML = gameState.cards.map(c => `
+            <div class="collection-card">
+                <div style="font-size:48px">${c.owned > 0 ? c.emoji : '🔒'}</div>
+                <div class="card-name">${c.name}</div>
+                <div class="card-rarity ${c.rarity}">${c.rarity.toUpperCase()}</div>
+                <div style="font-size:11px; margin-top:5px">${c.owned}/${c.max}</div>
+                <div style="font-size:10px; opacity:0.6">${c.points} pts</div>
+            </div>
+        `).join('');
+        
+        // Stats Page
+        const unique = gameState.cards.filter(c => c.owned > 0).length;
+        const completion = Math.round((unique / cards.length) * 100);
+        const totalCards = gameState.cards.reduce((s,c) => s + c.owned, 0);
+        document.getElementById('statsCompletion').innerHTML = `
+            <div style="margin-bottom:12px">📊 Collection Completion</div>
+            <div style="font-size:32px; font-weight:bold">${completion}%</div>
+            <div style="font-size:13px; opacity:0.7">${unique}/${cards.length} Animals</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${completion}%"></div></div>
+            <div style="font-size:12px">Total Cards: ${totalCards} | Unique: ${unique}</div>
+        `;
+        
+        const common = gameState.cards.filter(c => c.rarity === 'common').reduce((s,c) => s + c.owned, 0);
+        const rare = gameState.cards.filter(c => c.rarity === 'rare').reduce((s,c) => s + c.owned, 0);
+        const epic = gameState.cards.filter(c => c.rarity === 'epic').reduce((s,c) => s + c.owned, 0);
+        const legendary = gameState.cards.filter(c => c.rarity === 'legendary').reduce((s,c) => s + c.owned, 0);
+        
+        document.getElementById('statsDetail').innerHTML = `
+            <div>🎨 Rarity Bre
